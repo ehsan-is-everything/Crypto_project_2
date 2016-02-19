@@ -7,16 +7,16 @@
 #define TRUE 1
 #define MIN_NUM -100
 #define MAX_NUM 100
-
-int _Sbox_1[16]={3,8,15,1,10,6,5,11,14,13,4,2,7,0,9,12};
-int _Sbox_1_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
+/*
+int _Sbox_0[16]={3,8,15,1,10,6,5,11,14,13,4,2,7,0,9,12};
+int _Sbox_0_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
 
 
 void init(){
 	//initialize the linear profile of s1
 	for(int i=0;i<INPUT_SIZE;i++)
 		for(int j=0;j<OUTPUT_SIZE;j++)
-			_Sbox_1_linearProfile[i][j]=0;
+			_Sbox_0_linearProfile[i][j]=0;
 }
 
 int liklyhood(char x,char y,int* sbox){
@@ -97,24 +97,25 @@ int findMin(int profile[INPUT_SIZE][OUTPUT_SIZE],int* row, int* col){
 
 	return value;
 }
+
 void main (void){
 	init();
 	//liklyhood(0,4,_Sbox_1);
-	generatingLinearProfile(_Sbox_1_linearProfile,_Sbox_1);
+	generatingLinearProfile(_Sbox_0_linearProfile,_Sbox_0);
 
 	for(int i=0;i<16;i++){
 		for(int j=0;j<OUTPUT_SIZE;j++){
-			printf("%d,",_Sbox_1_linearProfile[i][j]);
+			printf("%d,",_Sbox_0_linearProfile[i][j]);
 		}
 		printf("\n");
 	}
 	int r=-1;
 	int c=-1;
-	int value=findMin(_Sbox_1_linearProfile,&r,&c);
+	int value=findMin(_Sbox_0_linearProfile,&r,&c);
 	printf("min = %d,r=%d,c=%d\n",value,r,c);
 	r=-1;
 	c=-1;
-	value=findMax(_Sbox_1_linearProfile,&r,&c);
+	value=findMax(_Sbox_0_linearProfile,&r,&c);
 	printf("max = %d,r=%d,c=%d",value,r,c);
 	getchar();
-}
+}*/
