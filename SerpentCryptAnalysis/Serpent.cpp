@@ -22,6 +22,72 @@ void init(){
 void IP(int* plain){
 
 }
+
+void SLeyer(unsigned int input[4],unsigned int* output, int round){
+	switch (round){
+		case 0:
+			for(int i=0;i<4;i++){
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15<<28))>>28])<<28);
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15<<24))>>24])<<24);
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15<<20))>>20])<<20);
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15<<16))>>16])<<16);
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15<<12))>>12])<<12);
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15<<8))>>8])<<8);
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15<<4))>>4])<<4);
+				output[i]=output[i]|((_Sbox_0[(input[i]&(15))]));
+			}
+			break;
+		case 1:
+			for(int i=0;i<4;i++){
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15<<28))>>28])<<28);
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15<<24))>>24])<<24);
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15<<20))>>20])<<20);
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15<<16))>>16])<<16);
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15<<12))>>12])<<12);
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15<<8))>>8])<<8);
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15<<4))>>4])<<4);
+				output[i]=output[i]|((_Sbox_1[(input[i]&(15))]));
+			}
+			break;
+		case 2:
+			for(int i=0;i<4;i++){
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15<<28))>>28])<<28);
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15<<24))>>24])<<24);
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15<<20))>>20])<<20);
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15<<16))>>16])<<16);
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15<<12))>>12])<<12);
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15<<8))>>8])<<8);
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15<<4))>>4])<<4);
+				output[i]=output[i]|((_Sbox_2[(input[i]&(15))]));
+			}
+			break;
+		case 3:
+			for(int i=0;i<4;i++){
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15<<28))>>28])<<28);
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15<<24))>>24])<<24);
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15<<20))>>20])<<20);
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15<<16))>>16])<<16);
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15<<12))>>12])<<12);
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15<<8))>>8])<<8);
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15<<4))>>4])<<4);
+				output[i]=output[i]|((_Sbox_3[(input[i]&(15))]));
+			}
+			break;
+		case 4:
+			for(int i=0;i<4;i++){
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15<<28))>>28])<<28);
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15<<24))>>24])<<24);
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15<<20))>>20])<<20);
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15<<16))>>16])<<16);
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15<<12))>>12])<<12);
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15<<8))>>8])<<8);
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15<<4))>>4])<<4);
+				output[i]=output[i]|((_Sbox_4[(input[i]&(15))]));
+			}
+			break;
+	}
+}
+
 void trans1bit(unsigned int* bits,unsigned int size,unsigned int input[4],unsigned int* output,unsigned int place){
 	char res=0;
 	for(int i=0;i<size;i++){
@@ -316,8 +382,8 @@ void LinearTrans(unsigned int input[4],unsigned int* output){
 void main(void){
 	unsigned int input[4]={65536,0,0,0};
 	unsigned int output[4]={0,0,0,0};
-	LinearTrans(input,output);
-	
+	//LinearTrans(input,output);
+	SLeyer(input,output,0);
 	for(int i=0;i<4;i++)
 		printf("%d",output[i]);
 }
