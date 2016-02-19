@@ -41,8 +41,8 @@ void generatingLinearProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){
 int findMax(int profile[INPUT_SIZE][OUTPUT_SIZE],int* row, int* col){
 	int value=MIN_NUM;
 	if(*row==-1 && *col ==-1){
-		for(int i=0;i<INPUT_SIZE;i++)
-			for(int j=0;j<OUTPUT_SIZE;j++){
+		for(int i=1;i<INPUT_SIZE;i++)
+			for(int j=1;j<OUTPUT_SIZE;j++){
 				if(profile[i][j]>value){
 					value=profile[i][j];
 					*row=i;
