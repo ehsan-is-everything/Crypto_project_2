@@ -819,6 +819,46 @@ void inverseLinearTrans(unsigned int input[4],unsigned int* output){
 	unsigned int _bits_127[7]={4, 27, 86, 97, 113, 115, 127};
 	trans1bit(_bits_127,7,input,output,127);
 }
+//TODO inject this code from Zohre
+void xorSubkey(unsigned int input[4],unsigned int* output,int round){
+	int i;
+	for(i=0;i<4;i++){
+		output[i]=input[i];
+	}
+}
+
+void encrypt(unsigned int plain[4], unsigned int* cipher){
+	unsigned int tmpInput[4];
+	unsigned int tmpOutput[4];
+	//init arrays
+	int i;
+	for(i=0;i<4;i++){
+		tmpInput[i]=plain[i];
+		tmpOutput[i]=0;
+	}
+	int round;
+	for (round=0;round<ROUND-1;round++){
+		xorSubkey(tmpInput,tmpOutput,round);
+		for(i=0;i<4;i++){
+			tmpInput[i]=tmpOutput[i];
+			tmpOutput[i]=0;
+		}
+		SLayer(tmpInput,tmpOutput,round);
+		for(i=0;i<4;i++){
+			tmpInput[i]=tmpOutput[i];
+			tmpOutput[i]=0;
+		}
+		linearTrans(tmpInput,tmpOutput);
+		for(i=0;i<4;i++){
+			tmpInput[i]=tmpOutput[i];
+			tmpOutput[i]=0;
+		}
+	}
+	for(i=0;i<4;i++){
+		cipher[i]=tmpInput[i];
+	}
+}
+
 /*
 void main(void){
 	unsigned int input[4]={65536,0,0,0};
