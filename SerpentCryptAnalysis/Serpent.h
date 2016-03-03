@@ -4,7 +4,7 @@
 
 
 
-void init(){
+void serpentInit(){
 
 }
 
@@ -819,8 +819,7 @@ void InverseLinearTrans(unsigned int input[4],unsigned int* output){
 	unsigned int _bits_127[7]={4, 27, 86, 97, 113, 115, 127};
 	trans1bit(_bits_127,7,input,output,127);
 }
-
-
+/*
 void main(void){
 	unsigned int input[4]={65536,0,0,0};
 	unsigned int output[4]={0,0,0,0};
@@ -828,5 +827,7 @@ void main(void){
 	SLayer(input,output,0);
 	for(int i=0;i<4;i++)
 		printf("%d",output[i]);
+	getchar();
 }
+*/
 

@@ -1,11 +1,11 @@
-/*#include<stdio.h>
+#include<stdio.h>
 #include<malloc.h>
 #include "General.h"
 
 int _Sbox_0_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
 
 
-void init(){
+void linearInit(){
 	//initialize the linear profile of s1
 	for(int i=0;i<INPUT_SIZE;i++)
 		for(int j=0;j<OUTPUT_SIZE;j++)
@@ -25,10 +25,31 @@ int liklyhood(char x,char y,int* sbox){
 }
 
 void generatingLinearProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){
+	linearInit();
 	for(int i=0;i<INPUT_SIZE;i++)
 		for(int j=0;j<OUTPUT_SIZE;j++){
 			profile[i][j]=liklyhood(i,j,sbox);
 		}
 }
-*/
-#include "LinearProfile.h"
+
+/*void main (void){
+	init();
+	//liklyhood(0,4,_Sbox_1);
+	generatingLinearProfile(_Sbox_0_linearProfile,_Sbox_0);
+
+	for(int i=0;i<16;i++){
+		for(int j=0;j<OUTPUT_SIZE;j++){
+			printf("%d,",_Sbox_0_linearProfile[i][j]);
+		}
+		printf("\n");
+	}
+	int r=-1;
+	int c=-1;
+	int value=findMin(_Sbox_0_linearProfile,&r,&c);
+	printf("min = %d,r=%d,c=%d\n",value,r,c);
+	r=-1;
+	c=-1;
+	value=findMax(_Sbox_0_linearProfile,&r,&c);
+	printf("max = %d,r=%d,c=%d",value,r,c);
+	getchar();
+}*/

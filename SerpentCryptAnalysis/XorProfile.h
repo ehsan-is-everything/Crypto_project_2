@@ -1,6 +1,7 @@
-/*#include <stdio.h>
+#include <stdio.h>
 #include <malloc.h>
 #include "General.h"
+
 
 int _Sbox_1_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
 
@@ -59,25 +60,29 @@ void create_input_pairs(){
 	}
 }
 
-void init(){
+void xorInit(){
 	//initialize the Xor Profile of s1
 	for(int i=0;i<INPUT_SIZE;i++)
 		for(int j=0;j<OUTPUT_SIZE;j++)
 			_Sbox_1_XorProfile[i][j]=0;
+	
+	create_input_pairs ();
 }
 
 
 void generatingXorProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){
+	xorInit();
+	
 	for (int i=0; i< INPUT_SIZE ; i++){
 		input_pairs *current ; 
 		current = head [i] ; 
 		//(((j&1)^(k&1)) | (((j&2)^(k&2))) | (((j&4)^(k&4))) | (((j&8)^(k&8)))
 		while (current != NULL ) {
-		//	int column =_Sbox_1[((current->first_input&1)^ (current->second_input&1)) | 
-			//		            ((current->first_input&2)^ (current->second_input&2)) |
-				//				((current->first_input&4)^ (current->second_input&4)) |
-					//			((current->first_input&8)^ (current->second_input&8))];
-
+		/*	int column =_Sbox_1[((current->first_input&1)^ (current->second_input&1)) | 
+					            ((current->first_input&2)^ (current->second_input&2)) |
+								((current->first_input&4)^ (current->second_input&4)) |
+								((current->first_input&8)^ (current->second_input&8))];
+*/
 			int f = _Sbox_1[current->first_input];
 			int s = _Sbox_1[current->second_input]; 
 			_Sbox_1_XorProfile[i][((f&1)^(s&1)) | ((f&2)^(s&2)) | ((f&4)^(s&4)) | ((f&8)^(s&8))] ++ ;
@@ -92,6 +97,24 @@ double diff_pbob_calc (double pre_prob, double cur_prob) {
 	double result = pre_prob * cur_prob ; 
 	return result ;
 }
+/*
+int main (){
+	//for (int i=0; i<INPUT_SIZE; i++)
+		//head[i]= (input_pairs*) malloc (sizeof (input_pairs)); 
+	init(); 
+	create_input_pairs (); 
+	generatingXorProfile (_Sbox_1_XorProfile, _Sbox_1) ; 
+	for (int i=0; i<INPUT_SIZE ; i++) {
+		for (int j=0 ; j<INPUT_SIZE ; j++)
+			printf ("%d  " , _Sbox_1_XorProfile[i][j]) ; 
+		printf ("\n") ; 
+	}
 
-*/
-#include "XorProfile.h"
+	int r=-1;
+	int c=-1;
+	int value = findMax(_Sbox_1_XorProfile,&r,&c) ; 
+	
+	printf("max = %d,r=%d,c=%d\n",value, r, c);
+	getchar();
+	return 0;
+}*/

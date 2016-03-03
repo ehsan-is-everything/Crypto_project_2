@@ -74,8 +74,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="LinearProfile.cpp" />
-    <ClCompile Include="Serpent.cpp" />
+    <ClInclude Include="General.h" />
+    <ClInclude Include="LinearProfile.h" />
+    <ClInclude Include="Serpent.h" />
+    <ClInclude Include="XorProfile.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CryptAnalysis.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
