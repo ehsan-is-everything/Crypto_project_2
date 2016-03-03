@@ -2,8 +2,11 @@
 #include <malloc.h>
 #include "General.h"
 
-
+int _Sbox_0_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
 int _Sbox_1_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
+int _Sbox_2_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
+int _Sbox_3_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
+int _Sbox_4_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
 
 struct input_pairs
 {
@@ -61,18 +64,21 @@ void create_input_pairs(){
 }
 
 void xorInit(){
-	//initialize the Xor Profile of s1
+	//initialize the Xor Profile of s0,s1,s2,s3,s4
 	for(int i=0;i<INPUT_SIZE;i++)
-		for(int j=0;j<OUTPUT_SIZE;j++)
+		for(int j=0;j<OUTPUT_SIZE;j++){
+			_Sbox_0_XorProfile[i][j]=0;
 			_Sbox_1_XorProfile[i][j]=0;
+			_Sbox_2_XorProfile[i][j]=0;
+			_Sbox_3_XorProfile[i][j]=0;
+			_Sbox_4_XorProfile[i][j]=0;
+		}
 	
 	create_input_pairs ();
 }
 
 
 void generatingXorProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){
-	xorInit();
-	
 	for (int i=0; i< INPUT_SIZE ; i++){
 		input_pairs *current ; 
 		current = head [i] ; 
@@ -83,9 +89,9 @@ void generatingXorProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){
 								((current->first_input&4)^ (current->second_input&4)) |
 								((current->first_input&8)^ (current->second_input&8))];
 */
-			int f = _Sbox_1[current->first_input];
-			int s = _Sbox_1[current->second_input]; 
-			_Sbox_1_XorProfile[i][((f&1)^(s&1)) | ((f&2)^(s&2)) | ((f&4)^(s&4)) | ((f&8)^(s&8))] ++ ;
+			int f = sbox[current->first_input];
+			int s = sbox[current->second_input]; 
+			profile[i][((f&1)^(s&1)) | ((f&2)^(s&2)) | ((f&4)^(s&4)) | ((f&8)^(s&8))] ++ ;
 			current = current->next ; 
 		}	
      }
@@ -93,16 +99,12 @@ void generatingXorProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){
 
 
 
-double diff_pbob_calc (double pre_prob, double cur_prob) {
+double differentialProbabilityCalcuation (double pre_prob, double cur_prob) {
 	double result = pre_prob * cur_prob ; 
 	return result ;
 }
 /*
 int main (){
-	//for (int i=0; i<INPUT_SIZE; i++)
-		//head[i]= (input_pairs*) malloc (sizeof (input_pairs)); 
-	init(); 
-	create_input_pairs (); 
 	generatingXorProfile (_Sbox_1_XorProfile, _Sbox_1) ; 
 	for (int i=0; i<INPUT_SIZE ; i++) {
 		for (int j=0 ; j<INPUT_SIZE ; j++)

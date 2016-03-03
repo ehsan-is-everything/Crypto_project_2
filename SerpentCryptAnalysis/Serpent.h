@@ -158,7 +158,7 @@ void trans1bit(unsigned int* bits,unsigned int size,unsigned int input[4],unsign
 	output[index]=(res<<(31-shift)) | output[index];
 }
 
-void LinearTrans(unsigned int input[4],unsigned int* output){
+void linearTrans(unsigned int input[4],unsigned int* output){
 	unsigned int _bits_0[7]={16,52,56,70,83,94,105};
 	trans1bit(_bits_0,7,input,output,0);
 
@@ -434,7 +434,7 @@ void LinearTrans(unsigned int input[4],unsigned int* output){
 	trans1bit(_bits_127,3,input,output,127);
 }
 
-void InverseLinearTrans(unsigned int input[4],unsigned int* output){
+void inverseLinearTrans(unsigned int input[4],unsigned int* output){
 	unsigned int _bits_0[3]={53,55,72};
 	trans1bit(_bits_0,3,input,output,0);
 

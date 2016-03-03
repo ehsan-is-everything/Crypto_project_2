@@ -3,6 +3,7 @@
 
 #define INPUT_SIZE 16
 #define OUTPUT_SIZE 16
+#define MAX_DEF_SIZE 16
 #define FALSE 0
 #define TRUE 1
 #define MIN_NUM -100
