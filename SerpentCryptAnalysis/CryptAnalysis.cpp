@@ -5,6 +5,12 @@
 double characteresticProbability;
 unsigned int input[ROUND-1][4];
 unsigned int output[4];
+unsigned int key [4] = {1, 2, 3, 4} ; // input key 
+
+void init(){
+	serpentInit(key);
+
+}
 
 void differentialInit(){
 	//init probability
@@ -111,6 +117,8 @@ void featureExtraction(){
 	}
 }
 
+
+
 void differentialCryptAnalysis(){
 	differentialInit();
 
@@ -124,9 +132,14 @@ void differentialCryptAnalysis(){
 
 
 void main(void){
+	init();
+	
 	differentialCryptAnalysis();
-	/*unsigned int in[4]={1<<28,0,0,0};
-	unsigned int out[4];
-	encrypt(in,out);*/
+	
+	unsigned int in[4]={1<<28,0,0,0};
+	unsigned int out[4]={0,0,0,0};
+	encrypt(in,out);
+	in[0]=0;
+	decrypt(out,in);
 	getchar();
 }
