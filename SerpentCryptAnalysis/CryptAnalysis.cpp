@@ -134,12 +134,14 @@ void differentialCryptAnalysis(){
 void main(void){
 	init();
 	
-	differentialCryptAnalysis();
+	//differentialCryptAnalysis();
 	
-	unsigned int in[4]={1<<28,0,0,0};
+	unsigned int in[4]={1<<31,0,0,0};
 	unsigned int out[4]={0,0,0,0};
-	encrypt(in,out);
+	/*encrypt(in,out);
 	in[0]=0;
 	decrypt(out,in);
+	getchar();*/
+	linearTrans(in,out);
 	getchar();
 }

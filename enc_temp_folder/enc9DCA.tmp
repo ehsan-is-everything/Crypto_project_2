@@ -155,7 +155,7 @@ void linearTrans(unsigned int input[4],unsigned int* output){
 	trans1bit(_bits_7,3,input,output,7);
 
 	unsigned int _bits_8[7]={24,60,64,78,91,102,113};
-	trans1bit(_bits_8,7,input,output,8);
+	trans1bit(_bits_,7,input,output,8);
 	unsigned int _bits_9[3]={36,90,103};
 	trans1bit(_bits_9,3,input,output,9);
 	unsigned int _bits_10[7]={ 6,10,17,23,38,84,92};
