@@ -2,11 +2,11 @@
 #include <malloc.h>
 #include "General.h"
 
-int _Sbox_0_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_1_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_2_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_3_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_4_XorProfile[INPUT_SIZE][OUTPUT_SIZE];
+int _Sbox_0_XorProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_1_XorProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_2_XorProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_3_XorProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_4_XorProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
 
 struct input_pairs
 {
@@ -65,15 +65,6 @@ void create_input_pairs(){
 
 void xorInit(){
 	//initialize the Xor Profile of s0,s1,s2,s3,s4
-	for(int i=0;i<INPUT_SIZE;i++)
-		for(int j=0;j<OUTPUT_SIZE;j++){
-			_Sbox_0_XorProfile[i][j]=0;
-			_Sbox_1_XorProfile[i][j]=0;
-			_Sbox_2_XorProfile[i][j]=0;
-			_Sbox_3_XorProfile[i][j]=0;
-			_Sbox_4_XorProfile[i][j]=0;
-		}
-	
 	create_input_pairs ();
 }
 

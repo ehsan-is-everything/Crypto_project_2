@@ -3,8 +3,8 @@
 #include "XorProfile.h"
 
 double characteresticProbability;
-unsigned int input[ROUND-1][4];
-unsigned int output[4];
+unsigned int input[ROUND-1][4]={0};
+unsigned int output[4]={0};
 unsigned int key [4] = {1, 2, 3, 4} ; // input key 
 
 void init(){
@@ -21,14 +21,6 @@ void differentialInit(){
 	generatingXorProfile(_Sbox_1_XorProfile,_Sbox_1);
 	generatingXorProfile(_Sbox_2_XorProfile,_Sbox_2);
 	generatingXorProfile(_Sbox_3_XorProfile,_Sbox_3);
-	//init arrays
-	int i;
-	for(i=0;i<4;i++){
-		int j;
-		for(j=0;j<4;j++)
-			input[i][j]=0;
-		output[i]=0;
-	}
 }
 
 void featureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SIZE],unsigned int* tmpInput,unsigned int* tmpOutput, int round){
@@ -70,20 +62,16 @@ void featureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SIZE],unsigned
 
 void featureExtraction(){
 	int round;
-	unsigned int tmpInput[4];
-	unsigned int tmpOutput[4];
+	unsigned int tmpInput[4]={0};
+	unsigned int tmpOutput[4]={0};
 	//init arrays
 	int i;
-	for(i=0;i<4;i++){
-		tmpInput[i]=0;
-		tmpOutput[i]=0;
-	}
 	for(round=0; round<ROUND-1;round++){
 		switch(round){
 			case 0:
 				{
 					//find best prob for s0
-					int in=-1;int out=-1;
+					int in=-1,out=-1;
 					int value=findMax(_Sbox_0_XorProfile,&in,&out);
 					//set in as input of cipher 
 					input[0][0]=input[0][0]|(in<<28);
@@ -93,8 +81,7 @@ void featureExtraction(){
 					//produce input of next round
 					tmpOutput[0]=tmpOutput[0]|(out<<28);
 					linearTrans(tmpOutput,tmpInput);
-					int i;
-					for(i=0;i<4;i++){
+					for(int i=0;i<4;i++){
 						tmpOutput[i]=0;
 					}
 					break;
@@ -107,11 +94,11 @@ void featureExtraction(){
 				break;
 			case 3:
 				{
-					featureExtractionMiddleRounds(_Sbox_3_XorProfile,tmpInput,tmpOutput,round);
-					for(i=0;i<4;i++){
-						output[i]=tmpInput[i];
-					}
-					break;
+				featureExtractionMiddleRounds(_Sbox_3_XorProfile,tmpInput,tmpOutput,round);
+				for(i=0;i<4;i++){
+					output[i]=tmpInput[i];
+				}
+				break;
 				}
 		}
 	}
@@ -138,10 +125,11 @@ void main(void){
 	
 	unsigned int in[4]={1<<31,0,0,0};
 	unsigned int out[4]={0,0,0,0};
-	/*encrypt(in,out);
+	encrypt(in,out);
 	in[0]=0;
 	decrypt(out,in);
-	getchar();*/
-	linearTrans(in,out);
+	//getchar();
+	//linearTrans(in,out);
+	//inverseLinearTrans(in,out);
 	getchar();
 }
