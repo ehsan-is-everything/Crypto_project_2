@@ -78,45 +78,45 @@ void Rev_SLayer(unsigned int input[4],unsigned int* output, int round){
 	}
 }
 
-unsigned int _rotl(const unsigned int value, int shift) {
+unsigned int _rotl_(const unsigned int value, int shift) {
     if ((shift &= sizeof(value)*8 - 1) == 0)
       return value;
     return (value << shift) | (value >> (sizeof(value)*8 - shift));
 }
 
-unsigned int _rotr(const unsigned int value, int shift) {
+unsigned int _rotr_(const unsigned int value, int shift) {
     if ((shift &= sizeof(value)*8 - 1) == 0)
       return value;
     return (value >> shift) | (value << (sizeof(value)*8 - shift));
 }
 
 void linearTrans(unsigned int input[4],unsigned int* output){
-	input[0] = _rotl(input[0],13);
-	input[2] = _rotl(input[2],3);
+	input[0] = _rotl_(input[0],13);
+	input[2] = _rotl_(input[2],3);
 	input[1] = input[1]^input[0]^input[2];
 	input[3] = input[3]^input[2]^(input[0] << 3);
-	input[1] = _rotl(input[1], 1);
-	input[3] = _rotl(input[3], 7);
+	input[1] = _rotl_(input[1], 1);
+	input[3] = _rotl_(input[3], 7);
 	input[0] = input[0]^input[1]^input[3];
 	input[2] = input[2]^input[3]^(input[1] << 7);
-	input[0] = _rotl(input[0] , 5);
-	input[2] = _rotl(input[2],22);
+	input[0] = _rotl_(input[0] , 5);
+	input[2] = _rotl_(input[2],22);
 	for(int i=0;i<4;i++){
 		output[i]=input[i];
 	}
 }
 
 void inverseLinearTrans(unsigned int input[4],unsigned int* output){
-	input[2] = _rotr(input[2],22);
-	input[0] = _rotr(input[0] , 5);
+	input[2] = _rotr_(input[2],22);
+	input[0] = _rotr_(input[0] , 5);
 	input[2] = input[2]^input[3]^(input[1] << 7);
 	input[0] = input[0]^input[1]^input[3];
-	input[3] = _rotr(input[3], 7);
-	input[1] = _rotr(input[1], 1);
+	input[3] = _rotr_(input[3], 7);
+	input[1] = _rotr_(input[1], 1);
 	input[3] = input[3]^input[2]^(input[0] << 3);
 	input[1] = input[1]^input[0]^input[2];
-	input[2] = _rotr(input[2],3);
-	input[0] = _rotr(input[0],13);
+	input[2] = _rotr_(input[2],3);
+	input[0] = _rotr_(input[0],13);
 	for(int i=0;i<4;i++){
 		output[i]=input[i];
 	}
@@ -139,7 +139,7 @@ void KeySchedule (unsigned int *key) {
 		prekey[i] = (prekey[i-8] ^ prekey[i-5] ^ prekey[i-3] ^ prekey[i-1] ^ Golden_Ratio ^ i ) ; 
 		//int tmp = (prekey[i] & (2047 << 21)) >> 21 ;
 		//prekey[i] = (prekey[i] << 11) | tmp ;
-		prekey[i] = _rotl(prekey[i],11);
+		prekey[i] = _rotl_(prekey[i],11);
 	}
 
 	//calculating round keys using S-boxes 

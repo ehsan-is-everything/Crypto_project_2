@@ -2,24 +2,11 @@
 #include<malloc.h>
 #include "General.h"
 
-int _Sbox_0_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_1_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_2_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_3_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
-int _Sbox_4_linearProfile[INPUT_SIZE][OUTPUT_SIZE];
-
-
-void linearInit(){
-	//initialize the linear profile of s0,s1,s2,s3,s4
-	for(int i=0;i<INPUT_SIZE;i++)
-		for(int j=0;j<OUTPUT_SIZE;j++){
-			_Sbox_0_linearProfile[i][j]=0;
-			_Sbox_1_linearProfile[i][j]=0;
-			_Sbox_2_linearProfile[i][j]=0;
-			_Sbox_3_linearProfile[i][j]=0;
-			_Sbox_4_linearProfile[i][j]=0;
-		}
-}
+int _Sbox_0_linearProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_1_linearProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_2_linearProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_3_linearProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
+int _Sbox_4_linearProfile[INPUT_SIZE][OUTPUT_SIZE]={0};
 
 int liklyhood(char x,char y,int* sbox){
 	int counter=0;
@@ -38,6 +25,10 @@ void generatingLinearProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){
 		for(int j=0;j<OUTPUT_SIZE;j++){
 			profile[i][j]=liklyhood(i,j,sbox);
 		}
+}
+
+double pileUpLemma(double total, double current){
+	return total*current - (1 - total)*(1 - current);
 }
 
 /*void main (void){

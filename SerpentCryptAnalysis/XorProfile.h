@@ -15,6 +15,11 @@ struct input_pairs
 	input_pairs *next ; 
 };
 
+struct paire{
+	int first_input ; 
+	int second_input;
+};
+
 input_pairs *head [16] = { NULL } ; 
 
 
@@ -24,26 +29,37 @@ void push_pair (int index, int first , int second )
 		head[index] = (input_pairs*) malloc (sizeof (input_pairs)); 
 		head[index]->first_input= first ; 
 		head[index]->second_input=second ; 
-		head[index]->next=NULL ; 
+		head[index]->next=NULL ; 	
 		return ; 
 	}
-	input_pairs *current= head[index] ;
+	input_pairs *current= head[index] ;	
 	while (current->next != NULL ) 
 		current = current->next; 
 	current->next = (input_pairs*) malloc (sizeof (input_pairs));
 	current->next->first_input = first ; 
 	current->next->second_input = second ; 
-	current->next->next= NULL ; 
+	current->next->next= NULL ;	
 }
 
 void print_input_pairs (input_pairs *head) {
 	input_pairs *current= head ; 
+	//printf("size=%d\n",current->size);
 	while (current != NULL ) {
 		printf ("%d\t%d\n", current->first_input, current->second_input);
+		current=current->next;
 	}
 }
 
-
+void list2Array(input_pairs *head, paire* A){
+	input_pairs *current= head ;
+	for(int i=0;current!=NULL;i++){
+		paire p;
+		p.first_input=current->first_input;
+		p.second_input=current->second_input;
+		A[i] = p;
+		current=current->next;
+	}
+}
 
 void create_input_pairs(){
 	for (int i=0; i<INPUT_SIZE; i++) //output Difference 
