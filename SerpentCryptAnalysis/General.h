@@ -1,7 +1,7 @@
 #ifndef GEN
 #define GEN
 
-#define ROUND 5
+#define ROUND 4
 #define INPUT_SIZE 16
 #define OUTPUT_SIZE 16
 #define MAX_DEF_SIZE 16
