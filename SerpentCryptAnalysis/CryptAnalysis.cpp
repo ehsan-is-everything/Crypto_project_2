@@ -5,8 +5,7 @@
 #include <math.h>
 
 double characteresticProbability;
-unsigned int input[ROUND-1][4]={0};
-unsigned int output[4]={0};
+unsigned int input[ROUND][4]={0};
 unsigned int key [4] = {1, 2, 3, 4} ; // input key 
 FILE *plaintext_ciphertext ; 
 
@@ -36,34 +35,34 @@ void differentialFeatureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SI
 	{
 	case 0:
 		{
-		tmpOutput[0]=1073741824;
-		tmpOutput[1]=2048;
-		tmpOutput[2]=0;
-		tmpOutput[3]=1409417217;
+		tmpOutput[0]=262144;
+		tmpOutput[1]=2147483840;
+		tmpOutput[2]=16;
+		tmpOutput[3]=129;
 		break;
 		}
 	case 1:
 		{
 		tmpOutput[0]=0;
-		tmpOutput[1]=0;
-		tmpOutput[2]=0;
-		tmpOutput[3]=1342308352;
+		tmpOutput[1]=128;
+		tmpOutput[2]=16;
+		tmpOutput[3]=128;
 		break;
 		}
 	case 2:
 		{
-		tmpOutput[0]=5242880;
-		tmpOutput[1]=0;
+		tmpOutput[0]=0;
+		tmpOutput[1]=536870912;
 		tmpOutput[2]=0;
-		tmpOutput[3]=0;
+		tmpOutput[3]=536870912;
 		break;
 		}
 	case 3:
 		{
-		tmpOutput[0]=100666368;
-		tmpOutput[1]=0;
-		tmpOutput[2]=224;
-		tmpOutput[3]=225280;
+		tmpOutput[0]=67109376;
+		tmpOutput[1]=1140851208;
+		tmpOutput[2]=1073742360;
+		tmpOutput[3]=24;
 		characteresticProbability = pow(2.0,-31);
 		break;
 		}
@@ -82,7 +81,7 @@ void differentialFeatureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SI
 
 void differentialFeatureExtraction(){
 	int round;
-	unsigned int tmpInput[4]={2952790016,768,0,1258946567};
+	unsigned int tmpInput[4]={2147483712,145,2147745857,2147745873};
 	unsigned int tmpOutput[4]={0};
 	//init arrays
 	int i;
@@ -100,9 +99,6 @@ void differentialFeatureExtraction(){
 			case 3:
 				{
 				differentialFeatureExtractionMiddleRounds(_Sbox_3_XorProfile,tmpInput,tmpOutput,round);
-				for(i=0;i<4;i++){
-					output[i]=tmpInput[i];
-				}
 				break;
 				}
 		}
@@ -215,9 +211,6 @@ void linearFeatureExtraction(){
 			case 3:
 				{
 				linearFeatureExtractionMiddleRounds(_Sbox_3_linearProfile,tmpInput,tmpOutput,round);
-				for(i=0;i<4;i++){
-					output[i]=tmpInput[i];
-				}
 				break;
 				}
 		}
@@ -237,37 +230,51 @@ void last_round_exhaustive_search () {
 	int result[16]={0};
 
 	bool activeSboxes[32]={0};
-	for(int i=0;i<4;i++){
-				for(int j=28;j>-1;j=j-4)
-					if((output[i]&(15<<j))>>j!=0)
-						activeSboxes[8-(j+4)/4+i*8]=1;
-			}
+	for(int i=0;i<32;i++){
+		if(((input[ROUND - 1][0]&(1<<i))>>i)|((input[ROUND - 1][1]&(1<<i))>>i)<<1|((input[ROUND - 1][2]&(1<<i))>>i)<<2|((input[ROUND - 1][3]&(1<<i))>>i)<<3 != 0)
+			activeSboxes[i]=1;
+	}
 
-	for (int i=0; i<32; i++){//active sbox
-		int index = i/8;
-		int place = i%8;
-		if(activeSboxes[i] != 0){// if active
+	for (int index=0; index<32; index++){//active sbox
+		if(activeSboxes[index] != 0){// if active
 			for (int key=0; key<16; key++){ //all permutations of key
-			while(feof(plaintext_ciphertext) != NULL){//all pairs in file ZOHRE
+				fseek(plaintext_ciphertext,0,SEEK_SET);
+				while(true){//all pairs in file ZOHRE
 					fseek(plaintext_ciphertext,32, SEEK_CUR);
 					fread(c1,4,1,plaintext_ciphertext);
-					fread(c2,4,1,plaintext_ciphertext);
-					tmpc1_1[index] |= (((c1[index] & 15 << ((7 - i) * 4)) >> ((7 - i) * 4)) ^ key)<<((7 - i) * 4);
+					if (fread(c2,4,1,plaintext_ciphertext)<1)
+						break;
+
+					int tmp = (((c1[0]&(1<<index))>>index)|((c1[1]&(1<<index))>>index)<<1|((c1[2]&(1<<index))>>index)<<2|((c1[3]&(1<<index))>>index)<<3)^key;
+					tmpc1_1[3] |= ((tmp & (1<<3))>>3)<<index;
+					tmpc1_1[2] |= ((tmp & (1<<2))>>2)<<index;
+					tmpc1_1[1] |= ((tmp & (1<<1))>>1)<<index;
+					tmpc1_1[0] |= ((tmp & (1)))<<index;
 					inverseLinearTrans(tmpc1_1,tmpc1_2);
 					Rev_SLayer(tmpc1_2,tmpc1_1,ROUND - 1);
-					tmpc2_1[index] |= (((c2[index] & 15 << ((7 - i) * 4)) >> ((7 - i) * 4)) ^ key)<<((7 - i) * 4);
+					
+					tmp = (((c2[0]&(1<<index))>>index)|((c2[1]&(1<<index))>>index)<<1|((c2[2]&(1<<index))>>index)<<2|((c2[3]&(1<<index))>>index)<<3)^key;
+					tmpc2_1[3] |= ((tmp & (1<<3))>>3)<<index;
+					tmpc2_1[2] |= ((tmp & (1<<2))>>2)<<index;
+					tmpc2_1[1] |= ((tmp & (1<<1))>>1)<<index;
+					tmpc2_1[0] |= ((tmp & (1)))<<index;
 					inverseLinearTrans(tmpc2_1,tmpc2_2);
 					Rev_SLayer(tmpc2_2,tmpc2_1,ROUND - 1);
 				
-				if ((input[ROUND - 1][index] & 15 << ((7 - i) * 4)) >> ((7 - i) * 4) == (tmpc1_1[index] ^ tmpc2_1[index]) & 15 << ((7 - i) * 4) >> ((7 - i) * 4))
-					result[key]++;
+					int deltaOut = ((input[ROUND - 1][0]&(1<<index))>>index)|((input[ROUND - 1][1]&(1<<index))>>index)<<1|((input[ROUND - 1][2]&(1<<index))>>index)<<2|((input[ROUND - 1][3]&(1<<index))>>index)<<3;
+					int u1 = ((tmpc1_1[0]&(1<<index))>>index)|((tmpc1_1[1]&(1<<index))>>index)<<1|((tmpc1_1[2]&(1<<index))>>index)<<2|((tmpc1_1[3]&(1<<index))>>index)<<3;
+					int u2 = ((tmpc2_1[0]&(1<<index))>>index)|((tmpc2_1[1]&(1<<index))>>index)<<1|((tmpc2_1[2]&(1<<index))>>index)<<2|((tmpc2_1[3]&(1<<index))>>index)<<3;
+					if (u1 ^ u2 == deltaOut)
+						result[key]++;
+				}
 			}
-			}
-			int max = result[0]; //maybe there is more than one ZOHRE
+			int max = result[0]; 
 			for(int i=1; i<16; i++)
 				if(result[i] > max)
 					max = result[i];
-			key[index] |= max << ((7 - i) * 4);
+			for (int i=0;i<16;i++)
+				if(result[i]==max)
+					push(index,i);
 		}
 	}
 
@@ -282,65 +289,122 @@ void Plaintext_Ciphertext_Generation () {
 		return;
 	}
 	
-	int best_input = (input[0][0]&(15<<28))>>28 ;
-	paire bestPairs_8[16];
-	paire bestPairs_4[16];
-	paire bestPairs_1[16];
-	paire bestPairs_9[16];
-	paire bestPairs_5[16];
+	paire bestPairs_13[16];
+	paire bestPairs_10[16];
+	paire bestPairs_2[16];
+	paire bestPairs_12[16];
+	paire bestPairs_14[16];
 	paire zeroPairs[16];
-	list2Array(head[best_input],bestPairs_1);
-	list2Array(head[best_input],bestPairs_4);
-	list2Array(head[best_input],bestPairs_5);
-	list2Array(head[best_input],bestPairs_8);
-	list2Array(head[best_input],bestPairs_9);
+	list2Array(head[2],bestPairs_2);
+	list2Array(head[10],bestPairs_10);
+	list2Array(head[12],bestPairs_12);
+	list2Array(head[13],bestPairs_13);
+	list2Array(head[14],bestPairs_14);
 	list2Array(head[0],zeroPairs);
 
-	unsigned int plain_1[4];
-	unsigned int cipher_1[4];
-	unsigned int plain_2[4];
-	unsigned int cipher_2[4];
+	unsigned int plain_1[4]={0};
+	unsigned int cipher_1[4]={0};
+	unsigned int plain_2[4]={0};
+	unsigned int cipher_2[4]={0};
 	
-	for(int i_8=0;i_8<1;i_8++){
-		for(int i_7=0;i_7<1;i_7++){
-			for(int i_6=0;i_6<1;i_6++){
-				for(int i_5=0;i_5<1;i_5++){
-					for(int i_4=0;i_4<1;i_4++){
-						for(int i_3=0;i_3<1;i_3++){
-							for(int i_2=0;i_2<1;i_2++){
-								for(int i_1=0;i_1<1;i_1++){
-									
-											plain_1[0]=bestPairs_8[i_8].first_input <<28|zeroPairs[i_7].first_input <<24|zeroPairs[i_6].first_input <<20|
-												zeroPairs[i_5].first_input <<16|zeroPairs[i_4].first_input <<12|zeroPairs[i_3].first_input <<8|
-												bestPairs_4[i_2].first_input <<4|zeroPairs[i_1].first_input;
-											plain_2[0]=bestPairs_8[i_8].second_input <<28|zeroPairs[i_7].second_input <<24|zeroPairs[i_6].second_input <<20|
-												zeroPairs[i_5].second_input <<16|zeroPairs[i_4].second_input <<12|zeroPairs[i_3].second_input <<8|
-												bestPairs_4[i_2].second_input <<4|zeroPairs[i_1].second_input;
-											plain_1[1]=zeroPairs[i_8].first_input <<28|zeroPairs[i_7].first_input <<24|zeroPairs[i_6].first_input <<20|
-												zeroPairs[i_5].first_input <<16|zeroPairs[i_4].first_input <<12|zeroPairs[i_3].first_input <<8|
-												bestPairs_9[i_2].first_input <<4|bestPairs_1[i_1].first_input;
-											plain_2[1]=zeroPairs[i_8].second_input <<28|zeroPairs[i_7].second_input <<24|zeroPairs[i_6].second_input <<20|
-												zeroPairs[i_5].second_input <<16|zeroPairs[i_4].second_input <<12|zeroPairs[i_3].second_input <<8|
-												bestPairs_9[i_2].second_input <<4|bestPairs_1[i_1].second_input;
-											plain_1[2]=bestPairs_8[i_8].first_input <<28|zeroPairs[i_7].first_input <<24|zeroPairs[i_6].first_input <<20|
-												bestPairs_4[i_5].first_input <<16|zeroPairs[i_4].first_input <<12|zeroPairs[i_3].first_input <<8|
-												bestPairs_4[i_2].first_input <<4|bestPairs_1[i_1].first_input;
-											plain_2[2]=bestPairs_8[i_8].second_input <<28|zeroPairs[i_7].second_input <<24|zeroPairs[i_6].second_input <<20|
-												bestPairs_4[i_5].second_input <<16|zeroPairs[i_4].second_input <<12|zeroPairs[i_3].second_input <<8|
-												bestPairs_4[i_2].second_input <<4|bestPairs_1[i_1].second_input;
-											plain_1[3]=bestPairs_8[i_8].first_input <<28|zeroPairs[i_7].first_input <<24|zeroPairs[i_6].first_input <<20|
-												bestPairs_4[i_5].first_input <<16|zeroPairs[i_4].first_input <<12|zeroPairs[i_3].first_input <<8|
-												bestPairs_5[i_2].first_input <<4|bestPairs_1[i_1].first_input;
-											plain_2[3]=bestPairs_8[i_8].second_input <<28|zeroPairs[i_7].second_input <<24|zeroPairs[i_6].second_input <<20|
-												bestPairs_4[i_5].second_input <<16|zeroPairs[i_4].second_input <<12|zeroPairs[i_3].second_input <<8|
-												bestPairs_5[i_2].second_input <<4|bestPairs_1[i_1].second_input;
-											encrypt(plain_1,cipher_1);
-											encrypt(plain_2,cipher_2);
-											fwrite(&plain_1,sizeof(int),4,plaintext_ciphertext);
-											fwrite(&plain_2,sizeof(int),4,plaintext_ciphertext);
-											fwrite(&cipher_1,sizeof(int),4,plaintext_ciphertext);
-											fwrite(&cipher_2,sizeof(int),4,plaintext_ciphertext);
-											fclose(plaintext_ciphertext);
+	for(int i_0=0;i_0<16;i_0++){
+		for(int i_1=0;i_1<16;i_1++){
+			for(int i_2=0;i_2<16;i_2++){
+				for(int i_4=0;i_4<16;i_4++){
+					for(int i_6=0;i_6<16;i_6++){
+						for(int i_7=0;i_7<16;i_7++){
+							for(int i_18=0;i_18<16;i_18++){
+								for(int i_31=0;i_31<16;i_31++){			
+									for(int index=0;index<32;index++){
+										if(index == 0){
+											plain_1[3] |= ((bestPairs_14[i_0].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((bestPairs_14[i_0].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((bestPairs_14[i_0].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((bestPairs_14[i_0].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((bestPairs_14[i_0].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_14[i_0].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_14[i_0].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_14[i_0].second_input & (1)))<<index;		
+										}else if(index == 4){
+											plain_1[3] |= ((bestPairs_10[i_4].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((bestPairs_10[i_4].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((bestPairs_10[i_4].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((bestPairs_10[i_4].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((bestPairs_10[i_4].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_10[i_4].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_10[i_4].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_10[i_4].second_input & (1)))<<index;		
+										}else if(index == 6){
+											plain_1[3] |= ((bestPairs_13[i_6].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((bestPairs_13[i_6].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((bestPairs_13[i_6].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((bestPairs_13[i_6].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((bestPairs_13[i_6].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_13[i_6].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_13[i_6].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_13[i_6].second_input & (1)))<<index;		
+										}else if(index == 7){
+											plain_1[3] |= ((bestPairs_2[i_7].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((bestPairs_2[i_7].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((bestPairs_2[i_7].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((bestPairs_2[i_7].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((bestPairs_2[i_7].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_2[i_7].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_2[i_7].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_2[i_7].second_input & (1)))<<index;		
+										}else if(index == 18){
+											plain_1[3] |= ((bestPairs_12[i_18].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((bestPairs_12[i_18].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((bestPairs_12[i_18].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((bestPairs_12[i_18].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((bestPairs_12[i_18].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_12[i_18].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_12[i_18].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_12[i_18].second_input & (1)))<<index;		
+										}else if(index == 31){
+											plain_1[3] |= ((bestPairs_13[i_31].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((bestPairs_13[i_31].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((bestPairs_13[i_31].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((bestPairs_13[i_31].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((bestPairs_13[i_31].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_13[i_31].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_13[i_31].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_13[i_31].second_input & (1)))<<index;		
+										}else if(index == 1){
+											plain_1[3] |= ((zeroPairs[i_1].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((zeroPairs[i_1].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((zeroPairs[i_1].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((zeroPairs[i_1].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((zeroPairs[i_1].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((zeroPairs[i_1].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((zeroPairs[i_1].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((zeroPairs[i_1].second_input & (1)))<<index;		
+										}else{
+											plain_1[3] |= ((zeroPairs[i_2].first_input & (1<<3))>>3)<<index;
+											plain_1[2] |= ((zeroPairs[i_2].first_input & (1<<2))>>2)<<index;
+											plain_1[1] |= ((zeroPairs[i_2].first_input & (1<<1))>>1)<<index;
+											plain_1[0] |= ((zeroPairs[i_2].first_input & (1)))<<index;		
+
+											plain_2[3] |= ((zeroPairs[i_2].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((zeroPairs[i_2].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((zeroPairs[i_2].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((zeroPairs[i_2].second_input & (1)))<<index;		
+										}
+
+									}
+									encrypt(plain_1,cipher_1);
+									encrypt(plain_2,cipher_2);
+									fwrite(&plain_1,sizeof(int),4,plaintext_ciphertext);
+									fwrite(&plain_2,sizeof(int),4,plaintext_ciphertext);
+									fwrite(&cipher_1,sizeof(int),4,plaintext_ciphertext);
+									fwrite(&cipher_2,sizeof(int),4,plaintext_ciphertext);
 								}
 							}
 						}
@@ -350,7 +414,7 @@ void Plaintext_Ciphertext_Generation () {
 		}
 	}
 	
-	
+	fclose(plaintext_ciphertext);
 }
 
 
@@ -380,14 +444,16 @@ void main(void){
 	//Plaintext_Ciphertext_Generation();
 	//print_input_pairs(head[2]);
 	//list2Array(head[2]);
-	//unsigned int in[4]={262144,2147483840,16,129};
-	//unsigned int out[4]={0,0,0,0};
-	//encrypt(in,out);
-	//in[0]=0;
-	//decrypt(out,in);
+	/*unsigned int in[4]={2147483712,145,2147745857,2147745873};
+	unsigned int out[4]={0,0,0,0};
+	encrypt(in,out);
+	in[0]=0;
+	decrypt(out,in);*/
 	//getchar();
 	//linearTrans(in,out);
 	//inverseLinearTrans(in,out);
-	last_round_exhaustive_search();
+	//last_round_exhaustive_search();
+	print_node();
+
 	getchar();
 }

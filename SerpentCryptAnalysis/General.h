@@ -1,5 +1,6 @@
 #ifndef GEN
 #define GEN
+#include <malloc.h>
 
 #define ROUND 4
 #define INPUT_SIZE 16
@@ -82,4 +83,40 @@ int findMin(int profile[INPUT_SIZE][OUTPUT_SIZE],int* row, int* col){
 
 	return value;
 }
+
+struct node{
+	int key;
+	node* next;
+};
+
+node *finalKey[32]={NULL};
+void push (int index, int key )
+{
+	if (finalKey[index] == NULL ) {
+		finalKey[index] = (node*) malloc (sizeof (node)); 
+		finalKey[index]->key= key ; 
+		finalKey[index]->next=NULL ; 	
+		return ; 
+	}
+	node *current= finalKey[index] ;	
+	while (current->next != NULL ) 
+		current = current->next; 
+	current->next = (node*) malloc (sizeof (node));
+	current->next->key= key ; 
+	current->next->next= NULL ;	
+}
+void print_node () {
+	for(int i=0;i<32;i++){
+		node *current=finalKey[i];
+		printf("index: %d",i);
+		int size=0;
+		while (current != NULL ) {
+			printf (" -> key:%d", current->key);
+			current=current->next;
+			size++;
+		}
+		printf("\tsize = %d\n",size);
+	}
+}
+
 #endif
