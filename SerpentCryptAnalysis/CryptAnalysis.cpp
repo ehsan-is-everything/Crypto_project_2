@@ -97,10 +97,8 @@ void differentialFeatureExtraction(){
 				differentialFeatureExtractionMiddleRounds(_Sbox_2_XorProfile,tmpInput,tmpOutput,round);
 				break;
 			case 3:
-				{
 				differentialFeatureExtractionMiddleRounds(_Sbox_3_XorProfile,tmpInput,tmpOutput,round);
 				break;
-				}
 		}
 	}
 }
@@ -120,34 +118,40 @@ void linearFeatureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SIZE],un
 	for(i=0;i<4;i++){
 		input[round][i]=tmpInput[i];
 	}
-	//extract 4 bit input of each sbox
-	int index;
-	for(index=0;index<4;index++){
-		int j;
-		for(j=28;j>-1;j=j-4){
-			int in=(tmpInput[index]&(15<<j))>>j;
-			//check for being active
-			if(in!=0){
-				//find the best out put from xor profile
-				int out=-1,value=-1;
-					//find best prob for s0
-					int outMax=-1;
-					int valueMax=findMax(_Sbox_0_linearProfile,&in,&outMax);
-					int outMin=-1;
-					int valueMin=findMin(_Sbox_0_linearProfile,&in,&outMin);
-					if(valueMax > MAX_DEF_SIZE-valueMin){
-						out=outMax;
-						value=valueMax;
-					}else{
-						out=outMin;
-						value=valueMin;
-					}
-				//total prob calc
-				double cur_prob=((double)value)/((double)MAX_DEF_SIZE);
-				characteresticProbability = pileUpLemma(characteresticProbability,cur_prob);
-				//produce the output aray
-				tmpOutput[index]=tmpOutput[index]|(out<<j);
-			}
+	switch(round)
+	{
+	case 0://3
+		{
+		tmpOutput[0]=268968008;
+		tmpOutput[1]=35127808;
+		tmpOutput[2]=66624;
+		tmpOutput[3]=268967944;
+		break;
+		}
+	case 1://4
+		{
+		tmpOutput[0]=294912;
+		tmpOutput[1]=2415919104;
+		tmpOutput[2]=301989888;
+		tmpOutput[3]=0;
+		break;
+		}
+	case 2://5
+		{
+		tmpOutput[0]=0;
+		tmpOutput[1]=0;
+		tmpOutput[2]=536870912;
+		tmpOutput[3]=1;
+		break;
+		}
+	case 3://6
+		{
+		tmpOutput[0]=128;
+		tmpOutput[1]=0;
+		tmpOutput[2]=0;
+		tmpOutput[3]=0;
+		characteresticProbability = pow(2.0,-31);
+		break;
 		}
 	}
 	//produce next round input
@@ -165,43 +169,15 @@ void linearFeatureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SIZE],un
 
 void linearFeatureExtraction(){
 	int round;
-	unsigned int tmpInput[4]={0};
+	unsigned int tmpInput[4]={35194432,35127808,303113736,66624};
 	unsigned int tmpOutput[4]={0};
 	//init arrays
 	int i;
-	for(round=0; round<ROUND-1;round++){
+	for(round=0; round<ROUND;round++){
 		switch(round){
-			case 0:
-				{
-					/*int in=-1,out=-1,value=-1;
-					//find best prob for s0
-					int inMax=-1,outMax=-1;
-					int valueMax=findMax(_Sbox_0_linearProfile,&inMax,&outMax);
-					int inMin=-1,outMin=-1;
-					int valueMin=findMin(_Sbox_0_linearProfile,&inMin,&outMin);
-					if(valueMax > MAX_DEF_SIZE - valueMin){
-						in=inMax;
-						out=outMax;
-						value=valueMax;
-					}else{
-						in=inMin;
-						out=outMin;
-						value=valueMin;
-					}
-					//set in as input of cipher 
-					input[0][0]=input[0][0]|(in<<28);
-					//total prob calc
-					double cur_prob=((double)value)/((double)MAX_DEF_SIZE);
-					characteresticProbability = pileUpLemma(characteresticProbability,cur_prob);
-					//produce input of next round
-					tmpOutput[0]=tmpOutput[0]|(out<<28);
-					linearTrans(tmpOutput,tmpInput);
-					for(int i=0;i<4;i++){
-						tmpOutput[i]=0;
-					}*/
-					linearFeatureExtractionMiddleRounds(_Sbox_0_linearProfile,tmpInput,tmpOutput,round);
-					break;
-				}
+			case 0:	
+				linearFeatureExtractionMiddleRounds(_Sbox_0_linearProfile,tmpInput,tmpOutput,round);
+				break;
 			case 1:
 				linearFeatureExtractionMiddleRounds(_Sbox_1_linearProfile,tmpInput,tmpOutput,round);
 				break;
@@ -209,15 +185,95 @@ void linearFeatureExtraction(){
 				linearFeatureExtractionMiddleRounds(_Sbox_2_linearProfile,tmpInput,tmpOutput,round);
 				break;
 			case 3:
-				{
 				linearFeatureExtractionMiddleRounds(_Sbox_3_linearProfile,tmpInput,tmpOutput,round);
 				break;
-				}
 		}
 	}
 }
 
-void last_round_exhaustive_search () {
+void linear_last_round_exhaustive_search () {
+	plaintext_ciphertext=fopen("linear_plaintext_ciphertext.txt", "r");
+
+	unsigned int c1[4];
+	unsigned int p1[4];//should be initialize with file
+	unsigned int tmpc1_1[4]={0};
+	unsigned int tmpc1_2[4]={0};
+	unsigned int keyArray[4]={0};
+
+	bool activeSboxesLastRound[32]={0};
+	int numberOfActivesLastRound = 0;
+	for(int i=0;i<32;i++){
+		if(((input[ROUND - 1][0]&(1<<i))>>i)|((input[ROUND - 1][1]&(1<<i))>>i)<<1|((input[ROUND - 1][2]&(1<<i))>>i)<<2|((input[ROUND - 1][3]&(1<<i))>>i)<<3 != 0){
+			activeSboxesLastRound[i]=1;
+			numberOfActivesLastRound++;
+		}
+	}
+
+	bool activeSboxesFirstRound[32]={0};
+	for(int i=0;i<32;i++){
+		if(((input[0][0]&(1<<i))>>i)|((input[0][1]&(1<<i))>>i)<<1|((input[0][2]&(1<<i))>>i)<<2|((input[0][3]&(1<<i))>>i)<<3 != 0){
+			activeSboxesFirstRound[i]=1;
+		}
+	}
+	uint64_t max_key=(uint64_t)pow(2.0,numberOfActivesLastRound*4);
+	int index;
+	uint64_t count=0;
+
+	for (uint64_t key=0;key<max_key; key++){
+		fseek(plaintext_ciphertext,0,SEEK_SET);
+		for (index=0;index<32;index++){
+			if(activeSboxesLastRound[index] == TRUE){	
+				keyArray[3] |= (((15 & key) & (1<<3))>>3)<<index;
+				keyArray[2] |= (((15 & key) & (1<<2))>>2)<<index;
+				keyArray[1] |= (((15 & key) & (1<<1))>>1)<<index;
+				keyArray[0] |= (((15 & key) & (1)))<<index;
+				key=key >> 4;
+			}
+		}
+		while(true){//all pairs in file
+			if (fread(p1,4,1,plaintext_ciphertext)<1)
+				break;
+			if (fread(c1,4,1,plaintext_ciphertext)<1)
+				break;
+
+			for(int i=0;i<4;i++)
+				c1[i]^=keyArray[i];
+			inverseLinearTrans(c1,tmpc1_1);
+			Rev_SLayer(tmpc1_1,tmpc1_2,START_ROUND_LINEAR + ROUND - 1);
+
+			int xorResult=0;
+			for(index=0;index<4; index++){
+				if(activeSboxesLastRound[index] == TRUE){
+					xorResult^=(tmpc1_2[0]&(1<<index))>>index;
+					xorResult^=(tmpc1_2[1]&(1<<index))>>index;
+					xorResult^=(tmpc1_2[2]&(1<<index))>>index;
+					xorResult^=(tmpc1_2[3]&(1<<index))>>index;
+				}
+			}
+
+			for(index = 0; index<32;index++ ){
+				if(activeSboxesFirstRound[index] == TRUE){
+					xorResult^=(p1[0]&(1<<index))>>index;
+					xorResult^=(p1[1]&(1<<index))>>index;
+					xorResult^=(p1[2]&(1<<index))>>index;
+					xorResult^=(p1[3]&(1<<index))>>index;
+				}
+			}
+			if(xorResult == 0){
+				count++;
+			}
+		}
+		pushLinearKey(keyArray,count);
+	}
+	fclose(plaintext_ciphertext);
+}
+
+	
+
+
+
+
+void differential_last_round_exhaustive_search () {
 	plaintext_ciphertext=fopen("plaintext_ciphertext.txt", "r");
 
 	unsigned int c1[4];
@@ -241,7 +297,8 @@ void last_round_exhaustive_search () {
 				fseek(plaintext_ciphertext,0,SEEK_SET);
 				while(true){//all pairs in file ZOHRE
 					fseek(plaintext_ciphertext,32, SEEK_CUR);
-					fread(c1,4,1,plaintext_ciphertext);
+					if (fread(c1,4,1,plaintext_ciphertext)<1)
+						break;
 					if (fread(c2,4,1,plaintext_ciphertext)<1)
 						break;
 
@@ -278,7 +335,7 @@ void last_round_exhaustive_search () {
 		}
 	}
 
-
+	fclose(plaintext_ciphertext);
 }
 
 void Plaintext_Ciphertext_Generation () {
@@ -307,14 +364,14 @@ void Plaintext_Ciphertext_Generation () {
 	unsigned int plain_2[4]={0};
 	unsigned int cipher_2[4]={0};
 	
-	for(int i_0=0;i_0<16;i_0++){
-		for(int i_1=0;i_1<16;i_1++){
-			for(int i_2=0;i_2<16;i_2++){
-				for(int i_4=0;i_4<16;i_4++){
-					for(int i_6=0;i_6<16;i_6++){
-						for(int i_7=0;i_7<16;i_7++){
-							for(int i_18=0;i_18<16;i_18++){
-								for(int i_31=0;i_31<16;i_31++){			
+	for(int i_0=0;i_0<1;i_0++){
+		for(int i_1=0;i_1<1;i_1++){
+			for(int i_2=0;i_2<1;i_2++){
+				for(int i_4=0;i_4<1;i_4++){
+					for(int i_6=0;i_6<1;i_6++){
+						for(int i_7=0;i_7<1;i_7++){
+							for(int i_18=0;i_18<1;i_18++){
+								for(int i_31=0;i_31<1;i_31++){			
 									for(int index=0;index<32;index++){
 										if(index == 0){
 											plain_1[3] |= ((bestPairs_14[i_0].first_input & (1<<3))>>3)<<index;
@@ -424,7 +481,7 @@ void differentialCryptAnalysis(){
 
 	differentialFeatureExtraction();
 
-	last_round_exhaustive_search();
+	differential_last_round_exhaustive_search();
 
 }
 
@@ -432,6 +489,8 @@ void linearCryptAnalysis(){
 	linearInit();
 
 	linearFeatureExtraction();
+
+	linear_last_round_exhaustive_search();
 }
 
 
@@ -440,8 +499,9 @@ void linearCryptAnalysis(){
 void main(void){
 	init();
 	
-	differentialCryptAnalysis();
-	//Plaintext_Ciphertext_Generation();
+//	differentialCryptAnalysis();
+	linearCryptAnalysis();
+//	Plaintext_Ciphertext_Generation();
 	//print_input_pairs(head[2]);
 	//list2Array(head[2]);
 	/*unsigned int in[4]={2147483712,145,2147745857,2147745873};
@@ -453,7 +513,7 @@ void main(void){
 	//linearTrans(in,out);
 	//inverseLinearTrans(in,out);
 	//last_round_exhaustive_search();
-	print_node();
+	//print_node();
 
 	getchar();
 }

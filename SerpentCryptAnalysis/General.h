@@ -1,8 +1,10 @@
 #ifndef GEN
 #define GEN
 #include <malloc.h>
+#include <stdint.h>
 
 #define ROUND 4
+#define START_ROUND_LINEAR 3
 #define INPUT_SIZE 16
 #define OUTPUT_SIZE 16
 #define MAX_DEF_SIZE 16
@@ -118,5 +120,47 @@ void print_node () {
 		printf("\tsize = %d\n",size);
 	}
 }
+struct linearKey{
+	unsigned int key[4];
+	uint64_t count;
+	linearKey *next;
+};
+struct linearKeyHead{
+	uint64_t max;
+	linearKey *next;
+};
+linearKeyHead *linearKies = NULL;
+void pushLinearKey (unsigned int* key , uint64_t count)
+{
+	if (linearKies == NULL ) {
+		linearKies->next = (linearKey*) malloc (sizeof (linearKey)); 
+		for(int i=0; i<4;i++)
+			linearKies->next->key[i]= key[i] ;
+		linearKies->next->count=count;
+		linearKies->next->next=NULL ;
+		linearKies->max=count;
+		return ; 
+	}
+	linearKey *current= linearKies->next ;	
+	while (current->next != NULL ) 
+		current = current->next; 
+	current->next = (linearKey*) malloc (sizeof (linearKey));
+	for(int i=0; i<4;i++)
+		current->next->key[i]= key[i] ; 
+	current->count=count;
+	current->next->next= NULL ;
+	if(count > linearKies->max)
+		linearKies->max=count;
+}
 
+void printMaxLinearKies(){
+	linearKey *cur = linearKies->next;
+	uint16_t max = linearKies->max;
+	while(cur != NULL){
+		if(cur->count == max){
+			printf("key[0]=%d\tkey[1]=%d\tkey[2]=%d\tkey[3]=%d\n",cur->key[0],cur->key[1],cur->key[2],cur->key[3]);
+		}
+		cur=cur->next;
+	}
+}
 #endif
