@@ -15,6 +15,7 @@ FILE *linear_plaintext_ciphertext ;
 
 void init(){
 	serpentInit(key);
+	create_input_pairs ();
 
 }
 
@@ -22,7 +23,7 @@ void differentialInit(){
 	//init probability
 	characteresticProbability=1;
 	//generate all xor profiles
-	xorInit();
+	//xorInit();
 	generatingXorProfile(_Sbox_0_XorProfile,_Sbox_0);
 	generatingXorProfile(_Sbox_1_XorProfile,_Sbox_1);
 	generatingXorProfile(_Sbox_2_XorProfile,_Sbox_2);
@@ -116,80 +117,101 @@ void linearInit(){
 	generatingLinearProfile(_Sbox_3_linearProfile,_Sbox_3);
 }
 
-void linearFeatureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SIZE],unsigned int* tmpInput,unsigned int* tmpOutput, int round){
+void linearFeatureExtractionMiddleRounds(int profile[INPUT_SIZE][OUTPUT_SIZE],unsigned int* tmpOutput, int round){
 	int i;
 	//set input of this round
-	for(i=0;i<4;i++){
+	/*for(i=0;i<4;i++){
 		input[round][i]=tmpInput[i];
-	}
+	}*/
 	switch(round)
 	{
 	case 0://3
 		{
-		tmpOutput[0]=268968008;
-		tmpOutput[1]=35127808;
-		tmpOutput[2]=66624;
-		tmpOutput[3]=268967944;
+			input[round][0]=35194432;
+			input[round][1]=35127808;
+			input[round][2]=303113736;
+			input[round][3]=66624;
+
+			tmpOutput[0]=268968008;
+			tmpOutput[1]=35127808;
+			tmpOutput[2]=66624;
+			tmpOutput[3]=268967944;
 		break;
 		}
 	case 1://4
 		{
-		tmpOutput[0]=294912;
-		tmpOutput[1]=2415919104;
-		tmpOutput[2]=301989888;
-		tmpOutput[3]=0;
+			input[round][0]=2181070848;
+			input[round][1]=262144;
+			input[round][2]=33849344;
+			input[round][3]=301989888;
+			
+			tmpOutput[0]=294912;
+			tmpOutput[1]=2415919104;
+			tmpOutput[2]=301989888;
+			tmpOutput[3]=0;
 		break;
 		}
 	case 2://5
 		{
-		tmpOutput[0]=0;
-		tmpOutput[1]=0;
-		tmpOutput[2]=536870912;
-		tmpOutput[3]=1;
+			input[round][0]=0;
+			input[round][1]=536870913;
+			input[round][2]=0;
+			input[round][3]=0;
+			
+			tmpOutput[0]=0;
+			tmpOutput[1]=0;
+			tmpOutput[2]=536870912;
+			tmpOutput[3]=1;
 		break;
 		}
 	case 3://6
 		{
-		tmpOutput[0]=128;
-		tmpOutput[1]=0;
-		tmpOutput[2]=0;
-		tmpOutput[3]=0;
-		characteresticProbability = pow(2.0,-31);
+			input[round][0]=0;
+			input[round][1]=0;
+			input[round][2]=0;
+			input[round][3]=128;
+			
+			tmpOutput[0]=128;
+			tmpOutput[1]=0;
+			tmpOutput[2]=0;
+			tmpOutput[3]=0;
+
 		break;
 		}
 	}
 	//produce next round input
-	for(i=0;i<4;i++){
+	/*for(i=0;i<4;i++){
 		tmpInput[i]=0;
 	}
 	linearTrans(tmpOutput,tmpInput);
 	
+	SLayer(tmpInput, tmpOutput,round + START_ROUND_LINEAR);
 	for(i=0;i<4;i++){
+		tmpInput[i]=tmpOutput[i];
 		tmpOutput[i]=0;
-	}
+	}*/
 	
 }
 
 
 void linearFeatureExtraction(){
 	int round;
-	unsigned int tmpInput[4]={35194432,35127808,303113736,66624};
 	unsigned int tmpOutput[4]={0};
 	//init arrays
 	int i;
 	for(round=0; round<ROUND;round++){
 		switch(round){
 			case 0:	
-				linearFeatureExtractionMiddleRounds(_Sbox_0_linearProfile,tmpInput,tmpOutput,round);
+				linearFeatureExtractionMiddleRounds(_Sbox_0_linearProfile,tmpOutput,round);
 				break;
 			case 1:
-				linearFeatureExtractionMiddleRounds(_Sbox_1_linearProfile,tmpInput,tmpOutput,round);
+				linearFeatureExtractionMiddleRounds(_Sbox_1_linearProfile,tmpOutput,round);
 				break;
 			case 2:
-				linearFeatureExtractionMiddleRounds(_Sbox_2_linearProfile,tmpInput,tmpOutput,round);
+				linearFeatureExtractionMiddleRounds(_Sbox_2_linearProfile,tmpOutput,round);
 				break;
 			case 3:
-				linearFeatureExtractionMiddleRounds(_Sbox_3_linearProfile,tmpInput,tmpOutput,round);
+				linearFeatureExtractionMiddleRounds(_Sbox_3_linearProfile,tmpOutput,round);
 				break;
 		}
 	}
@@ -300,9 +322,9 @@ void differential_last_round_exhaustive_search () {
 				fseek(plaintext_ciphertext,0,SEEK_SET);
 				while(true){//all pairs in file ZOHRE
 					fseek(plaintext_ciphertext,32, SEEK_CUR);
-					if (fread(c1,4,4,plaintext_ciphertext)<1)
+					if (fread(c1,4,4,plaintext_ciphertext)<4)
 						break;
-					if (fread(c2,4,4,plaintext_ciphertext)<1)
+					if (fread(c2,4,4,plaintext_ciphertext)<4)
 						break;
 
 					int tmp = (((c1[0]&(1<<index))>>index)|((c1[1]&(1<<index))>>index)<<1|((c1[2]&(1<<index))>>index)<<2|((c1[3]&(1<<index))>>index)<<3)^key;
@@ -341,7 +363,7 @@ void differential_last_round_exhaustive_search () {
 	fclose(plaintext_ciphertext);
 }
 
-void Plaintext_Ciphertext_Generation (char *fileName, int type) {
+void Differential_Plaintext_Ciphertext_Generation (char *fileName) {
 	 
 	FILE *file = fopen (fileName,"a"); 
 	if (file == NULL) {
@@ -381,104 +403,82 @@ void Plaintext_Ciphertext_Generation (char *fileName, int type) {
 											plain_1[2] |= ((bestPairs_14[i_0].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_14[i_0].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_14[i_0].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((bestPairs_14[i_0].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((bestPairs_14[i_0].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((bestPairs_14[i_0].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((bestPairs_14[i_0].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((bestPairs_14[i_0].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_14[i_0].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_14[i_0].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_14[i_0].second_input & (1)))<<index;		
 										}else if(index == 4){
 											plain_1[3] |= ((bestPairs_10[i_4].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_10[i_4].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_10[i_4].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_10[i_4].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((bestPairs_10[i_4].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((bestPairs_10[i_4].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((bestPairs_10[i_4].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((bestPairs_10[i_4].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((bestPairs_10[i_4].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_10[i_4].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_10[i_4].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_10[i_4].second_input & (1)))<<index;		
 										}else if(index == 6){
 											plain_1[3] |= ((bestPairs_13[i_6].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_13[i_6].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_13[i_6].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_13[i_6].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((bestPairs_13[i_6].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((bestPairs_13[i_6].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((bestPairs_13[i_6].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((bestPairs_13[i_6].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((bestPairs_13[i_6].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_13[i_6].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_13[i_6].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_13[i_6].second_input & (1)))<<index;		
 										}else if(index == 7){
 											plain_1[3] |= ((bestPairs_2[i_7].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_2[i_7].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_2[i_7].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_2[i_7].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((bestPairs_2[i_7].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((bestPairs_2[i_7].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((bestPairs_2[i_7].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((bestPairs_2[i_7].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((bestPairs_2[i_7].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_2[i_7].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_2[i_7].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_2[i_7].second_input & (1)))<<index;		
 										}else if(index == 18){
 											plain_1[3] |= ((bestPairs_12[i_18].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_12[i_18].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_12[i_18].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_12[i_18].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((bestPairs_12[i_18].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((bestPairs_12[i_18].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((bestPairs_12[i_18].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((bestPairs_12[i_18].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((bestPairs_12[i_18].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_12[i_18].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_12[i_18].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_12[i_18].second_input & (1)))<<index;		
 										}else if(index == 31){
 											plain_1[3] |= ((bestPairs_13[i_31].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_13[i_31].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_13[i_31].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_13[i_31].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((bestPairs_13[i_31].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((bestPairs_13[i_31].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((bestPairs_13[i_31].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((bestPairs_13[i_31].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((bestPairs_13[i_31].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((bestPairs_13[i_31].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((bestPairs_13[i_31].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((bestPairs_13[i_31].second_input & (1)))<<index;		
 										}else if(index == 1){
 											plain_1[3] |= ((zeroPairs[i_1].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((zeroPairs[i_1].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((zeroPairs[i_1].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((zeroPairs[i_1].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((zeroPairs[i_1].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((zeroPairs[i_1].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((zeroPairs[i_1].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((zeroPairs[i_1].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((zeroPairs[i_1].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((zeroPairs[i_1].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((zeroPairs[i_1].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((zeroPairs[i_1].second_input & (1)))<<index;		
 										}else{
 											plain_1[3] |= ((zeroPairs[i_2].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((zeroPairs[i_2].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((zeroPairs[i_2].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((zeroPairs[i_2].first_input & (1)))<<index;		
-											if(type == DIFFERENTIAL){
-												plain_2[3] |= ((zeroPairs[i_2].second_input & (1<<3))>>3)<<index;
-												plain_2[2] |= ((zeroPairs[i_2].second_input & (1<<2))>>2)<<index;
-												plain_2[1] |= ((zeroPairs[i_2].second_input & (1<<1))>>1)<<index;
-												plain_2[0] |= ((zeroPairs[i_2].second_input & (1)))<<index;		
-											}
+											plain_2[3] |= ((zeroPairs[i_2].second_input & (1<<3))>>3)<<index;
+											plain_2[2] |= ((zeroPairs[i_2].second_input & (1<<2))>>2)<<index;
+											plain_2[1] |= ((zeroPairs[i_2].second_input & (1<<1))>>1)<<index;
+											plain_2[0] |= ((zeroPairs[i_2].second_input & (1)))<<index;		
 										}
 
 									}
-									if(type==DIFFERENTIAL){
-										encrypt(plain_1,cipher_1, 0, ROUND);
-										encrypt(plain_2,cipher_2, 0, ROUND);
-										fwrite(&plain_1,sizeof(int),4,file);
-										fwrite(&plain_2,sizeof(int),4,file);
-										fwrite(&cipher_1,sizeof(int),4,file);
-										fwrite(&cipher_2,sizeof(int),4,file);
-									}else if(type == LINEAR){
-										encrypt(plain_1,cipher_1, START_ROUND_LINEAR, ROUND);
-										fwrite(&plain_1,sizeof(int),4,file);
-										fwrite(&cipher_1,sizeof(int),4,file);
-									}
+									encrypt(plain_1,cipher_1, 0, ROUND);
+									encrypt(plain_2,cipher_2, 0, ROUND);
+									fwrite(&plain_1,sizeof(int),4,file);
+									fwrite(&plain_2,sizeof(int),4,file);
+									fwrite(&cipher_1,sizeof(int),4,file);
+									fwrite(&cipher_2,sizeof(int),4,file);
 								}
 							}
 						}
@@ -488,6 +488,35 @@ void Plaintext_Ciphertext_Generation (char *fileName, int type) {
 		}
 	}
 	
+	fclose(file);
+}
+
+void Linear_Plaintext_Ciphertext_Generation (char *fileName){
+	FILE *file = fopen (fileName,"a"); 
+	if (file == NULL) {
+		printf ("Can't create %s file\n", fileName);
+		return;
+	}
+	unsigned int plain_1[4]={0};
+	unsigned int cipher_1[4]={0};
+	bool activebits[128]={0};
+	int sizeOfActiveBits=0;
+	for(int index=0;index<128;index++){
+		if(input[0][index/32]&(1<<(index%32)) == 1){
+			activebits[index] == TRUE;
+			sizeOfActiveBits++;
+		}
+	}
+	uint64_t max = pow(2.0 , sizeOfActiveBits);
+	for(uint64_t i=0; i<max;i++){
+		if(activebits[i] == TRUE){
+			plain_1[i/32] |= (1 << (i % 32));
+		}
+	}
+	encrypt(plain_1,cipher_1, 0, ROUND);
+	fwrite(&plain_1,sizeof(int),4,file);
+	fwrite(&cipher_1,sizeof(int),4,file);
+
 	fclose(file);
 }
 

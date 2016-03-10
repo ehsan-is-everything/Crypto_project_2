@@ -2,6 +2,7 @@
 #define GEN
 #include <malloc.h>
 #include <stdint.h>
+#include <fstream>
 
 #define ROUND 4
 #define START_ROUND_LINEAR 3
@@ -12,6 +13,7 @@
 #define TRUE 1
 #define MIN_NUM -100
 #define MAX_NUM 100
+FILE *Differential_Output;
 
 int _Sbox_0[16]={3,8,15,1,10,6,5,11,14,13,4,2,7,0,9,12};
 int _Sbox_1[16]={15,12,2,7,9,0,5,10,1,11,14,8,6,13,3,4};
@@ -26,6 +28,9 @@ int _Inv_Sbox_1[16]={5,8,2,14,15,6,12,3,11,4,7,9,1,13,10,0};
 int _Inv_Sbox_2[16]={12,9,15,4,11,14,1,2,0,3,6,13,5,8,10,7};
 int _Inv_Sbox_3[16]={0,9,10,7,11,14,6,13,3,5,12,2,4,8,15,1};
 int _Inv_Sbox_4[16]={5,0,8,3,10,9,7,14,2,12,11,6,4,15,13,1};
+int _Inv_Sbox_5[16]={8,15,2,9,4,1,13,14,11,6,5,3,7,12,10,0};
+int _Inv_Sbox_6[16]={15,10,1,13,5,3,6,0,4,9,14,7,2,12,8,11};
+int _Inv_Sbox_7[16]={3,0,6,13,9,14,15,8,5,12,11,7,10,1,4,2};
 
 int findMax(int profile[INPUT_SIZE][OUTPUT_SIZE],int* row, int* col){
 	int value=MIN_NUM;
@@ -108,17 +113,25 @@ void push (int index, int key )
 	current->next->next= NULL ;	
 }
 void print_node () {
+	Differential_Output=fopen("Differential_Output.txt","a");
+	if (Differential_Output==NULL)
+		return;
 	for(int i=0;i<32;i++){
 		node *current=finalKey[i];
-		printf("index: %d",i);
+		//printf("index: %d",i);
+		fprintf(Differential_Output,"index: %d", i); 
 		int size=0;
 		while (current != NULL ) {
-			printf (" -> key:%d", current->key);
+			//printf (" -> key:%d", current->key);
+			fprintf(Differential_Output, " -> key:%d", current->key) ;
 			current=current->next;
 			size++;
 		}
-		printf("\tsize = %d\n",size);
+		//printf("\tsize = %d\n",size);
+		fprintf(Differential_Output,"\tsize = %d\n" ,size); //zohre 
 	}
+	fflush(Differential_Output); 
+	fclose(Differential_Output); 
 }
 struct linearKey{
 	unsigned int key[4];

@@ -79,10 +79,10 @@ void create_input_pairs(){
 	}
 }
 
-void xorInit(){
-	//initialize the Xor Profile of s0,s1,s2,s3,s4
-	create_input_pairs ();
-}
+//void xorInit(){
+//	//initialize the Xor Profile of s0,s1,s2,s3,s4
+//	create_input_pairs ();
+//}
 
 
 void generatingXorProfile(int profile[INPUT_SIZE][OUTPUT_SIZE],int* sbox){

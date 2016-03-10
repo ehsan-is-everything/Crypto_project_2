@@ -55,6 +55,34 @@ void SLayer(unsigned int input[4],unsigned int* output, int round){
 				output[0] |= ((tmp & (1)))<<i;
 			}
 			break;
+		case 5:
+			for(int i=0;i<32;i++){
+				int tmp = _Sbox_5[((input[0]&(1<<i))>>i)|((input[1]&(1<<i))>>i)<<1|((input[2]&(1<<i))>>i)<<2|((input[3]&(1<<i))>>i)<<3];
+				output[3] |= ((tmp & (1<<3))>>3)<<i;
+				output[2] |= ((tmp & (1<<2))>>2)<<i;
+				output[1] |= ((tmp & (1<<1))>>1)<<i;
+				output[0] |= ((tmp & (1)))<<i;
+			}
+			break;
+		case 6:
+			for(int i=0;i<32;i++){
+				int tmp = _Sbox_6[((input[0]&(1<<i))>>i)|((input[1]&(1<<i))>>i)<<1|((input[2]&(1<<i))>>i)<<2|((input[3]&(1<<i))>>i)<<3];
+				output[3] |= ((tmp & (1<<3))>>3)<<i;
+				output[2] |= ((tmp & (1<<2))>>2)<<i;
+				output[1] |= ((tmp & (1<<1))>>1)<<i;
+				output[0] |= ((tmp & (1)))<<i;
+			}
+			break;
+		case 7:
+			for(int i=0;i<32;i++){
+				int tmp = _Sbox_7[((input[0]&(1<<i))>>i)|((input[1]&(1<<i))>>i)<<1|((input[2]&(1<<i))>>i)<<2|((input[3]&(1<<i))>>i)<<3];
+				output[3] |= ((tmp & (1<<3))>>3)<<i;
+				output[2] |= ((tmp & (1<<2))>>2)<<i;
+				output[1] |= ((tmp & (1<<1))>>1)<<i;
+				output[0] |= ((tmp & (1)))<<i;
+			}
+			break;
+
 	}
 }
 
@@ -99,6 +127,33 @@ void Rev_SLayer(unsigned int input[4],unsigned int* output, int round){
 		case 4:
 			for(int i=0;i<32;i++){
 				int tmp = _Inv_Sbox_4[((input[0]&(1<<i))>>i)|((input[1]&(1<<i))>>i)<<1|((input[2]&(1<<i))>>i)<<2|((input[3]&(1<<i))>>i)<<3];
+				output[3] |= ((tmp & (1<<3))>>3)<<i;
+				output[2] |= ((tmp & (1<<2))>>2)<<i;
+				output[1] |= ((tmp & (1<<1))>>1)<<i;
+				output[0] |= ((tmp & (1)))<<i;
+			}
+			break;
+		case 5:
+			for(int i=0;i<32;i++){
+				int tmp = _Inv_Sbox_5[((input[0]&(1<<i))>>i)|((input[1]&(1<<i))>>i)<<1|((input[2]&(1<<i))>>i)<<2|((input[3]&(1<<i))>>i)<<3];
+				output[3] |= ((tmp & (1<<3))>>3)<<i;
+				output[2] |= ((tmp & (1<<2))>>2)<<i;
+				output[1] |= ((tmp & (1<<1))>>1)<<i;
+				output[0] |= ((tmp & (1)))<<i;
+			}
+			break;
+		case 6:
+			for(int i=0;i<32;i++){
+				int tmp = _Inv_Sbox_6[((input[0]&(1<<i))>>i)|((input[1]&(1<<i))>>i)<<1|((input[2]&(1<<i))>>i)<<2|((input[3]&(1<<i))>>i)<<3];
+				output[3] |= ((tmp & (1<<3))>>3)<<i;
+				output[2] |= ((tmp & (1<<2))>>2)<<i;
+				output[1] |= ((tmp & (1<<1))>>1)<<i;
+				output[0] |= ((tmp & (1)))<<i;
+			}
+			break;
+		case 7:
+			for(int i=0;i<32;i++){
+				int tmp = _Inv_Sbox_7[((input[0]&(1<<i))>>i)|((input[1]&(1<<i))>>i)<<1|((input[2]&(1<<i))>>i)<<2|((input[3]&(1<<i))>>i)<<3];
 				output[3] |= ((tmp & (1<<3))>>3)<<i;
 				output[2] |= ((tmp & (1<<2))>>2)<<i;
 				output[1] |= ((tmp & (1<<1))>>1)<<i;
