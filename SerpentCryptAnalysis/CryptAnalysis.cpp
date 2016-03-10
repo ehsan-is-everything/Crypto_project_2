@@ -4,10 +4,14 @@
 #include <fstream> 
 #include <math.h>
 
+#define LINEAR 0
+#define DIFFERENTIAL 1
+
 double characteresticProbability;
 unsigned int input[ROUND][4]={0};
 unsigned int key [4] = {1, 2, 3, 4} ; // input key 
-FILE *plaintext_ciphertext ; 
+FILE *plaintext_ciphertext ;
+FILE *linear_plaintext_ciphertext ;
 
 void init(){
 	serpentInit(key);
@@ -192,8 +196,11 @@ void linearFeatureExtraction(){
 }
 
 void linear_last_round_exhaustive_search () {
-	plaintext_ciphertext=fopen("linear_plaintext_ciphertext.txt", "r");
-
+	linear_plaintext_ciphertext=fopen("linear_plainText_cipherText.txt", "r");
+	if (linear_plaintext_ciphertext == NULL) {
+		printf ("Can't open linear_plainText_cipherText.txt file\n");
+		return;
+	}
 	unsigned int c1[4];
 	unsigned int p1[4];//should be initialize with file
 	unsigned int tmpc1_1[4]={0};
@@ -217,23 +224,24 @@ void linear_last_round_exhaustive_search () {
 	}
 	uint64_t max_key=(uint64_t)pow(2.0,numberOfActivesLastRound*4);
 	int index;
-	uint64_t count=0;
 
 	for (uint64_t key=0;key<max_key; key++){
-		fseek(plaintext_ciphertext,0,SEEK_SET);
+		fseek(linear_plaintext_ciphertext,0,SEEK_SET);
+		uint64_t count=0;
+		uint64_t tmpkey=key;
 		for (index=0;index<32;index++){
 			if(activeSboxesLastRound[index] == TRUE){	
-				keyArray[3] |= (((15 & key) & (1<<3))>>3)<<index;
-				keyArray[2] |= (((15 & key) & (1<<2))>>2)<<index;
-				keyArray[1] |= (((15 & key) & (1<<1))>>1)<<index;
-				keyArray[0] |= (((15 & key) & (1)))<<index;
-				key=key >> 4;
+				keyArray[3] |= (((15 & tmpkey) & (1<<3))>>3)<<index;
+				keyArray[2] |= (((15 & tmpkey) & (1<<2))>>2)<<index;
+				keyArray[1] |= (((15 & tmpkey) & (1<<1))>>1)<<index;
+				keyArray[0] |= (((15 & tmpkey) & (1)))<<index;
+				tmpkey=tmpkey >> 4;
 			}
 		}
 		while(true){//all pairs in file
-			if (fread(p1,4,1,plaintext_ciphertext)<1)
+			if (fread(p1,4,4,linear_plaintext_ciphertext)<4)
 				break;
-			if (fread(c1,4,1,plaintext_ciphertext)<1)
+			if (fread(c1,4,4,linear_plaintext_ciphertext)<4)
 				break;
 
 			for(int i=0;i<4;i++)
@@ -265,13 +273,8 @@ void linear_last_round_exhaustive_search () {
 		}
 		pushLinearKey(keyArray,count);
 	}
-	fclose(plaintext_ciphertext);
+	fclose(linear_plaintext_ciphertext);
 }
-
-	
-
-
-
 
 void differential_last_round_exhaustive_search () {
 	plaintext_ciphertext=fopen("plaintext_ciphertext.txt", "r");
@@ -297,9 +300,9 @@ void differential_last_round_exhaustive_search () {
 				fseek(plaintext_ciphertext,0,SEEK_SET);
 				while(true){//all pairs in file ZOHRE
 					fseek(plaintext_ciphertext,32, SEEK_CUR);
-					if (fread(c1,4,1,plaintext_ciphertext)<1)
+					if (fread(c1,4,4,plaintext_ciphertext)<1)
 						break;
-					if (fread(c2,4,1,plaintext_ciphertext)<1)
+					if (fread(c2,4,4,plaintext_ciphertext)<1)
 						break;
 
 					int tmp = (((c1[0]&(1<<index))>>index)|((c1[1]&(1<<index))>>index)<<1|((c1[2]&(1<<index))>>index)<<2|((c1[3]&(1<<index))>>index)<<3)^key;
@@ -338,11 +341,11 @@ void differential_last_round_exhaustive_search () {
 	fclose(plaintext_ciphertext);
 }
 
-void Plaintext_Ciphertext_Generation () {
+void Plaintext_Ciphertext_Generation (char *fileName, int type) {
 	 
-	plaintext_ciphertext = fopen ("plaintext_ciphertext.txt","a"); 
-	if (plaintext_ciphertext == NULL) {
-		printf ("Can't create plaintext_ciphertext file\n");
+	FILE *file = fopen (fileName,"a"); 
+	if (file == NULL) {
+		printf ("Can't create %s file\n", fileName);
 		return;
 	}
 	
@@ -378,90 +381,104 @@ void Plaintext_Ciphertext_Generation () {
 											plain_1[2] |= ((bestPairs_14[i_0].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_14[i_0].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_14[i_0].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((bestPairs_14[i_0].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((bestPairs_14[i_0].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((bestPairs_14[i_0].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((bestPairs_14[i_0].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((bestPairs_14[i_0].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((bestPairs_14[i_0].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((bestPairs_14[i_0].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((bestPairs_14[i_0].second_input & (1)))<<index;		
+											}
 										}else if(index == 4){
 											plain_1[3] |= ((bestPairs_10[i_4].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_10[i_4].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_10[i_4].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_10[i_4].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((bestPairs_10[i_4].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((bestPairs_10[i_4].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((bestPairs_10[i_4].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((bestPairs_10[i_4].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((bestPairs_10[i_4].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((bestPairs_10[i_4].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((bestPairs_10[i_4].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((bestPairs_10[i_4].second_input & (1)))<<index;		
+											}
 										}else if(index == 6){
 											plain_1[3] |= ((bestPairs_13[i_6].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_13[i_6].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_13[i_6].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_13[i_6].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((bestPairs_13[i_6].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((bestPairs_13[i_6].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((bestPairs_13[i_6].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((bestPairs_13[i_6].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((bestPairs_13[i_6].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((bestPairs_13[i_6].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((bestPairs_13[i_6].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((bestPairs_13[i_6].second_input & (1)))<<index;		
+											}
 										}else if(index == 7){
 											plain_1[3] |= ((bestPairs_2[i_7].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_2[i_7].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_2[i_7].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_2[i_7].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((bestPairs_2[i_7].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((bestPairs_2[i_7].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((bestPairs_2[i_7].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((bestPairs_2[i_7].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((bestPairs_2[i_7].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((bestPairs_2[i_7].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((bestPairs_2[i_7].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((bestPairs_2[i_7].second_input & (1)))<<index;		
+											}
 										}else if(index == 18){
 											plain_1[3] |= ((bestPairs_12[i_18].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_12[i_18].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_12[i_18].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_12[i_18].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((bestPairs_12[i_18].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((bestPairs_12[i_18].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((bestPairs_12[i_18].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((bestPairs_12[i_18].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((bestPairs_12[i_18].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((bestPairs_12[i_18].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((bestPairs_12[i_18].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((bestPairs_12[i_18].second_input & (1)))<<index;		
+											}
 										}else if(index == 31){
 											plain_1[3] |= ((bestPairs_13[i_31].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((bestPairs_13[i_31].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((bestPairs_13[i_31].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((bestPairs_13[i_31].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((bestPairs_13[i_31].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((bestPairs_13[i_31].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((bestPairs_13[i_31].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((bestPairs_13[i_31].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((bestPairs_13[i_31].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((bestPairs_13[i_31].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((bestPairs_13[i_31].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((bestPairs_13[i_31].second_input & (1)))<<index;		
+											}
 										}else if(index == 1){
 											plain_1[3] |= ((zeroPairs[i_1].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((zeroPairs[i_1].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((zeroPairs[i_1].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((zeroPairs[i_1].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((zeroPairs[i_1].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((zeroPairs[i_1].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((zeroPairs[i_1].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((zeroPairs[i_1].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((zeroPairs[i_1].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((zeroPairs[i_1].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((zeroPairs[i_1].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((zeroPairs[i_1].second_input & (1)))<<index;		
+											}
 										}else{
 											plain_1[3] |= ((zeroPairs[i_2].first_input & (1<<3))>>3)<<index;
 											plain_1[2] |= ((zeroPairs[i_2].first_input & (1<<2))>>2)<<index;
 											plain_1[1] |= ((zeroPairs[i_2].first_input & (1<<1))>>1)<<index;
 											plain_1[0] |= ((zeroPairs[i_2].first_input & (1)))<<index;		
-
-											plain_2[3] |= ((zeroPairs[i_2].second_input & (1<<3))>>3)<<index;
-											plain_2[2] |= ((zeroPairs[i_2].second_input & (1<<2))>>2)<<index;
-											plain_2[1] |= ((zeroPairs[i_2].second_input & (1<<1))>>1)<<index;
-											plain_2[0] |= ((zeroPairs[i_2].second_input & (1)))<<index;		
+											if(type == DIFFERENTIAL){
+												plain_2[3] |= ((zeroPairs[i_2].second_input & (1<<3))>>3)<<index;
+												plain_2[2] |= ((zeroPairs[i_2].second_input & (1<<2))>>2)<<index;
+												plain_2[1] |= ((zeroPairs[i_2].second_input & (1<<1))>>1)<<index;
+												plain_2[0] |= ((zeroPairs[i_2].second_input & (1)))<<index;		
+											}
 										}
 
 									}
-									encrypt(plain_1,cipher_1);
-									encrypt(plain_2,cipher_2);
-									fwrite(&plain_1,sizeof(int),4,plaintext_ciphertext);
-									fwrite(&plain_2,sizeof(int),4,plaintext_ciphertext);
-									fwrite(&cipher_1,sizeof(int),4,plaintext_ciphertext);
-									fwrite(&cipher_2,sizeof(int),4,plaintext_ciphertext);
+									if(type==DIFFERENTIAL){
+										encrypt(plain_1,cipher_1, 0, ROUND);
+										encrypt(plain_2,cipher_2, 0, ROUND);
+										fwrite(&plain_1,sizeof(int),4,file);
+										fwrite(&plain_2,sizeof(int),4,file);
+										fwrite(&cipher_1,sizeof(int),4,file);
+										fwrite(&cipher_2,sizeof(int),4,file);
+									}else if(type == LINEAR){
+										encrypt(plain_1,cipher_1, START_ROUND_LINEAR, ROUND);
+										fwrite(&plain_1,sizeof(int),4,file);
+										fwrite(&cipher_1,sizeof(int),4,file);
+									}
 								}
 							}
 						}
@@ -471,10 +488,8 @@ void Plaintext_Ciphertext_Generation () {
 		}
 	}
 	
-	fclose(plaintext_ciphertext);
+	fclose(file);
 }
-
-
 
 void differentialCryptAnalysis(){
 	differentialInit();
@@ -501,7 +516,7 @@ void main(void){
 	
 //	differentialCryptAnalysis();
 	linearCryptAnalysis();
-//	Plaintext_Ciphertext_Generation();
+	//Plaintext_Ciphertext_Generation("plaintext_ciphertext.txt", DIFFERENTIAL);
 	//print_input_pairs(head[2]);
 	//list2Array(head[2]);
 	/*unsigned int in[4]={2147483712,145,2147745857,2147745873};
@@ -514,6 +529,14 @@ void main(void){
 	//inverseLinearTrans(in,out);
 	//last_round_exhaustive_search();
 	//print_node();
+	printMaxLinearKies();
+	/*generatingLinearProfile(_Sbox_1_linearProfile,_Sbox_1);
 
+	for(int i=0;i<16;i++){
+		for(int j=0;j<OUTPUT_SIZE;j++){
+			printf("%d,",_Sbox_1_linearProfile[i][j]);
+		}
+		printf("\n");
+	}*/
 	getchar();
 }

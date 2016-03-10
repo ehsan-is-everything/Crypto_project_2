@@ -133,6 +133,7 @@ linearKeyHead *linearKies = NULL;
 void pushLinearKey (unsigned int* key , uint64_t count)
 {
 	if (linearKies == NULL ) {
+		linearKies = (linearKeyHead*) malloc (sizeof (linearKeyHead)); 
 		linearKies->next = (linearKey*) malloc (sizeof (linearKey)); 
 		for(int i=0; i<4;i++)
 			linearKies->next->key[i]= key[i] ;

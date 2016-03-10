@@ -197,7 +197,7 @@ void xorSubkey(unsigned int input[4],unsigned int* output,int round){
 	}
 }
 
-void encrypt(unsigned int plain[4], unsigned int* cipher){
+void encrypt(unsigned int plain[4], unsigned int* cipher, int startRound, int numberOfRounds){
 	unsigned int tmpInput[4]={0};
 	unsigned int tmpOutput[4]={0};
 	//init arrays
@@ -205,13 +205,13 @@ void encrypt(unsigned int plain[4], unsigned int* cipher){
 	for(i=0;i<4;i++){
 		tmpInput[i]=plain[i];
 	}
-	int round=0;
+	int round=startRound;
 	xorSubkey(tmpInput,tmpOutput,round);
 		for(i=0;i<4;i++){
 			tmpInput[i]=tmpOutput[i];
 			tmpOutput[i]=0;
 		}
-	for (round=0;round<ROUND;round++){
+	for (round=startRound;round<numberOfRounds;round++){
 		SLayer(tmpInput,tmpOutput,round);
 		for(i=0;i<4;i++){
 			tmpInput[i]=tmpOutput[i];
